@@ -1,10 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { products } from "@/data/products";
 import ProductCard from "./ProductCard";
+
+interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  category: { slug: string } | null;
+  price: number;
+  originalPrice: number | null;
+  image: string;
+  rating: number;
+  reviews: number;
+  inStock: boolean;
+  badge: string | null;
+}
 
 const tabs = [
   { label: "All", value: "all" },
@@ -15,11 +28,18 @@ const tabs = [
 
 export default function FeaturedProducts() {
   const [activeTab, setActiveTab] = useState("all");
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then(setProducts);
+  }, []);
 
   const filtered =
     activeTab === "all"
       ? products.slice(0, 8)
-      : products.filter((p) => p.category === activeTab).slice(0, 8);
+      : products.filter((p) => p.category?.slug === activeTab).slice(0, 8);
 
   return (
     <section className="py-16">

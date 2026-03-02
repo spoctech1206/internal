@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin") // admin, staff
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  icon         String    @default("Sun")
+  description  String    @default("")
+  image        String    @default("")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  products     Product[]
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  name          String
+  brand         String
+  price         Float
+  originalPrice Float?
+  image         String      @default("")
+  rating        Float       @default(0)
+  reviews       Int         @default(0)
+  description   String      @default("")
+  inStock       Boolean     @default(true)
+  badge         String?
+  specs         String      @default("{}") // JSON string
+  categoryId    String
+  category      Category    @relation(fields: [categoryId], references: [id])
+  vendorId      String?
+  vendor        Vendor?     @relation(fields: [vendorId], references: [id])
+  orderItems    OrderItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Vendor {
+  id           String    @id @default(cuid())
+  companyName  String
+  contactName  String
+  email        String    @unique
+  phone        String
+  gstin        String    @default("")
+  panNumber    String    @default("")
+  address      String    @default("")
+  city         String    @default("")
+  state        String    @default("")
+  pincode      String    @default("")
+  status       String    @default("active") // active, inactive, pending
+  products     Product[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Customer {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  phone        String    @default("")
+  companyName  String    @default("")
+  gstin        String    @default("")
+  address      String    @default("")
+  city         String    @default("")
+  state        String    @default("")
+  pincode      String    @default("")
+  orders       Order[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  orderNo    String      @unique
+  customerId String
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  items      OrderItem[]
+  subtotal   Float
+  gst        Float
+  total      Float
+  status     String      @default("pending") // pending, confirmed, shipped, delivered, cancelled
+  notes      String      @default("")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+}

@@ -1,8 +1,22 @@
 import Link from "next/link";
 import { Star, ShoppingCart } from "lucide-react";
-import type { Product } from "@/data/products";
 
-export default function ProductCard({ product }: { product: Product }) {
+interface ProductCardProps {
+  product: {
+    id: string;
+    name: string;
+    brand: string;
+    price: number;
+    originalPrice?: number | null;
+    image: string;
+    rating: number;
+    reviews: number;
+    inStock: boolean;
+    badge?: string | null;
+  };
+}
+
+export default function ProductCard({ product }: ProductCardProps) {
   const discount = product.originalPrice
     ? Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100
